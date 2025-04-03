@@ -32,16 +32,21 @@ app.post('/api/story', async (req, res) => {
 
 app.post('/api/image', async (req, res) => {
   const { genre } = req.body;
+  const prompt = `An artistic depiction of a ${genre} scene`;
 
-  const placeholders = {
-    fantasy: 'https://placehold.co/512x512/8B4513/FFF?text=Fantasy+Scene',
-    'sci-fi': 'https://placehold.co/512x512/000080/FFF?text=Sci-Fi+Scene',
-    mystery: 'https://placehold.co/512x512/2F4F4F/FFF?text=Mystery+Scene',
-    adventure: 'https://placehold.co/512x512/228B22/FFF?text=Adventure+Scene',
-  };
+  try {
+    const imageResponse = await openai.images.generate({
+      model: 'dall-e-2',
+      prompt,
+      n: 1,
+      size: '512x512',
+    });
 
-  const placeholderUrl = placeholders[genre] || 'https://placehold.co/512x512?text=Unknown+Genre';
-  res.json({ imageUrl: placeholderUrl });
+    res.json({ imageUrl: imageResponse.data[0].url });
+  } catch (error) {
+    console.error('Image Error:', error.message);
+    res.status(500).json({ error: 'Failed to generate image' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

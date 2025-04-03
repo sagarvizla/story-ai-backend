@@ -1,7 +1,7 @@
 {
   "name": "story-ai-backend",
   "version": "1.0.0",
-  "description": "Backend for Story & Visual Generator using gpt-3.5-turbo and placeholder images",
+  "description": "Backend for Story & Visual Generator using gpt-3.5-turbo and DALL·E 2",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
