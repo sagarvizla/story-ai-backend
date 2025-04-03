@@ -1,16 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const { OpenAI } = require('openai');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const HYPERBOLIC_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzYWdhcnZpemxhQGdtYWlsLmNvbSIsImlhdCI6MTc0MzY4OTk2N30.CyQSkjVxtdDvRGB2pV3Nx9ntoOrFvSseXnEsUxvHVuw";
 
 app.get('/', (req, res) => {
-  res.send('Welcome to the Story & Visual Generator API');
+  res.send('Hyperbolic LLaMA Story Generator API is live');
 });
 
 app.post('/api/story', async (req, res) => {
@@ -18,34 +18,30 @@ app.post('/api/story', async (req, res) => {
   const prompt = `Write a short, creative ${genre} story in 2-3 sentences.`;
 
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const response = await axios.post(
+      'https://api.hyperbolic.xyz/v1/chat/completions',
+      {
+        model: 'meta-llama/Meta-Llama-3.1-405B-Instruct',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 150,
+        temperature: 0.7,
+        top_p: 0.9
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${HYPERBOLIC_API_KEY}`
+        }
+      }
+    );
 
-    res.json({ story: response.choices[0].message.content });
+    res.json({ story: response.data.choices[0].message.content });
   } catch (error) {
     console.error('Story Error:', error.message);
     res.status(500).json({ error: 'Failed to generate story' });
-  }
-});
-
-app.post('/api/image', async (req, res) => {
-  const { genre } = req.body;
-  const prompt = `An artistic depiction of a ${genre} scene`;
-
-  try {
-    const imageResponse = await openai.images.generate({
-      model: 'dall-e-2',
-      prompt,
-      n: 1,
-      size: '512x512',
-    });
-
-    res.json({ imageUrl: imageResponse.data[0].url });
-  } catch (error) {
-    console.error('Image Error:', error.message);
-    res.status(500).json({ error: 'Failed to generate image' });
   }
 });
 
