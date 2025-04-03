@@ -19,7 +19,7 @@ app.post('/api/story', async (req, res) => {
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
     });
 
@@ -32,21 +32,16 @@ app.post('/api/story', async (req, res) => {
 
 app.post('/api/image', async (req, res) => {
   const { genre } = req.body;
-  const prompt = `A beautiful, artistic depiction of a ${genre} scene.`;
 
-  try {
-    const imageResponse = await openai.images.generate({
-      model: 'dall-e-3',
-      prompt,
-      n: 1,
-      size: '1024x1024',
-    });
+  const placeholders = {
+    fantasy: 'https://placehold.co/512x512/8B4513/FFF?text=Fantasy+Scene',
+    'sci-fi': 'https://placehold.co/512x512/000080/FFF?text=Sci-Fi+Scene',
+    mystery: 'https://placehold.co/512x512/2F4F4F/FFF?text=Mystery+Scene',
+    adventure: 'https://placehold.co/512x512/228B22/FFF?text=Adventure+Scene',
+  };
 
-    res.json({ imageUrl: imageResponse.data[0].url });
-  } catch (error) {
-    console.error('Image Error:', error.message);
-    res.status(500).json({ error: 'Failed to generate image' });
-  }
+  const placeholderUrl = placeholders[genre] || 'https://placehold.co/512x512?text=Unknown+Genre';
+  res.json({ imageUrl: placeholderUrl });
 });
 
 const PORT = process.env.PORT || 3000;
